@@ -9,53 +9,62 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        ZStack {
+            Color(.darkGray)
+                .ignoresSafeArea(edges: .all)
+            
+            VStack(alignment: .leading, spacing: 16) {
+                Image("niagara_falls")
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                
+                HStack {
+                    Text("Niagara Falls")
+                        .font(.title)
+                        .bold()
+                    
+                    Spacer()
+                    
+                    VStack {
+                        HStack {
+                            Image(systemName: "star.fill")
+                            Image(systemName: "star.fill")
+                            Image(systemName: "star.fill")
+                            Image(systemName: "star.fill")
+                            Image(systemName: "star.leadinghalf.filled")
+                        }
+                        Text("(Reviews 361)")
                     }
+                    .foregroundStyle(.orange)
+                    .font(.caption)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                
+                Text("Come visit for an experience of a lifetime.")
+                
+                HStack {
+                    Spacer()
+                    Image(systemName: "fork.knife")
+                    Image(systemName: "binoculars.fill")
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+                .foregroundStyle(.gray)
+                .font(.caption)
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            .padding()
+            .background() {
+                Rectangle()
+                    .foregroundStyle(.white)
+                    .cornerRadius(16)
+                    .shadow(radius: 15)
             }
+            .padding()
         }
+        
+        
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
