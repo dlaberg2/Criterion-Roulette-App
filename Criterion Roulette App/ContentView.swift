@@ -15,10 +15,7 @@ struct ContentView: View {
                 .ignoresSafeArea(edges: .all)
             
             VStack(alignment: .leading, spacing: 16) {
-                Image("niagara_falls")
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                
                 
                 HStack {
                     Text("Niagara Falls")

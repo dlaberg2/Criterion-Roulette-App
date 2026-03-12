@@ -8,16 +8,12 @@
 import SwiftUI
 
 struct MainMenuView: View {
+    @State private var partyMember1: String = "Tyss"
+    @State private var partyMember2: String = "None"
+    @State private var partyMember3: String = "None"
+    @State private var partyMember4: String = "None"
+    
     var body: some View {
-        var partyMember1: String = "None"
-        var partyMember2: String = "None"
-        var partyMember3: String = "None"
-        var partyMember4: String = "None"
-
-//        NavigationStack() {
-//            Text("Criterion Roulette")
-//        }
-//
         NavigationStack{
             ZStack() {
                 Image("merchants")
@@ -35,7 +31,12 @@ struct MainMenuView: View {
                     .buttonStyle(.borderedProminent)
                     
                     NavigationLink("Set Party Members") {
-                        PartyView()
+                        PartyView(
+                            partyMember1: $partyMember1,
+                            partyMember2: $partyMember2,
+                            partyMember3: $partyMember3,
+                            partyMember4: $partyMember4
+                        )
                     }
                     .padding()
                     .buttonStyle(.borderedProminent)

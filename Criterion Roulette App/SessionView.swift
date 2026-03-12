@@ -9,7 +9,24 @@ import SwiftUI
 
 struct SessionView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        var runNumber: Int = 0
+        ZStack() {
+            Image("merchants")
+                .scaledToFit()
+            
+            VStack() {
+                Text("Session")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding()
+                
+                Text("Run: \(runNumber)")
+                    .font(.title)
+                    .padding()
+                
+                
+            }
+        }
     }
 }
 
