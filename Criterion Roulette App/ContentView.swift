@@ -10,55 +10,24 @@ import SwiftData
 
 struct ContentView: View {
     var body: some View {
-        ZStack {
-            Color(.darkGray)
-                .ignoresSafeArea(edges: .all)
-            
-            VStack(alignment: .leading, spacing: 16) {
-                
-                
-                HStack {
-                    Text("Niagara Falls")
-                        .font(.title)
-                        .bold()
-                    
-                    Spacer()
-                    
-                    VStack {
-                        HStack {
-                            Image(systemName: "star.fill")
-                            Image(systemName: "star.fill")
-                            Image(systemName: "star.fill")
-                            Image(systemName: "star.fill")
-                            Image(systemName: "star.leadinghalf.filled")
-                        }
-                        Text("(Reviews 361)")
-                    }
-                    .foregroundStyle(.orange)
-                    .font(.caption)
-                }
-                
-                Text("Come visit for an experience of a lifetime.")
-                
-                HStack {
-                    Spacer()
-                    Image(systemName: "fork.knife")
-                    Image(systemName: "binoculars.fill")
-                }
-                .foregroundStyle(.gray)
-                .font(.caption)
+        TabView {
+            NavigationStack {
+                MainMenuView()
+                    .navigationTitle(Text("Criterion Roulette"))
             }
-            .padding()
-            .background() {
-                Rectangle()
-                    .foregroundStyle(.white)
-                    .cornerRadius(16)
-                    .shadow(radius: 15)
+            .tabItem {
+                Label("Main", systemImage: "house.fill")
+                
+                Label("Session", systemImage: "play.circle.fill")
             }
-            .padding()
+            NavigationStack {
+                SessionView()
+                    .navigationTitle(Text("Sessions"))
+            }
+            .tabItem{
+                Label("Sessions", systemImage: "play.circle.fill")
+            }
         }
-        
-        
     }
 }
 
