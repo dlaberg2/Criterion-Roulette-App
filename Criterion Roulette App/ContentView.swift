@@ -21,11 +21,11 @@ struct ContentView: View {
                 Label("Session", systemImage: "play.circle.fill")
             }
             NavigationStack {
-                SessionView()
+                HistoryView()
                     .navigationTitle(Text("Sessions"))
             }
             .tabItem{
-                Label("Sessions", systemImage: "play.circle.fill")
+                Label("History", systemImage: "book.closed.fill")
             }
         }
     }

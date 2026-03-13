@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct Criterion_Roulette_AppApp: App {
+struct Criterion_Roulette_App: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
