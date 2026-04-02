@@ -133,3 +133,30 @@ struct Run: Identifiable, Codable {
         assignments.first(where: { $0.role == role })?.player
     }
 }
+
+// MARK: - Session
+// A session groups all runs played in one sitting with the same party.
+
+struct Session: Identifiable, Codable {
+    let id: UUID
+    let date: Date
+    let players: [Player]
+    var runs: [Run]
+
+    init(id: UUID = UUID(), date: Date = .now, players: [Player], runs: [Run] = []) {
+        self.id = id
+        self.date = date
+        self.players = players
+        self.runs = runs
+    }
+
+    var playerNames: String {
+        players.map(\.name).joined(separator: ", ")
+    }
+
+    var dungeonSummary: String {
+        let names = runs.map(\.dungeon.name)
+        let unique = Array(NSOrderedSet(array: names)) as? [String] ?? names
+        return unique.prefix(2).joined(separator: " · ") + (unique.count > 2 ? " +\(unique.count - 2)" : "")
+    }
+}

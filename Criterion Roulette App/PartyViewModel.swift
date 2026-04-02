@@ -9,18 +9,23 @@ class PartyViewModel: ObservableObject {
 
     @Published var players: [Player] = []
     @Published var currentRun: Run?
-    @Published var runHistory: [Run] = []
+    @Published var sessions: [Session] = []
     @Published var isRolling: Bool = false
     @Published var lastSaved: Bool = false
 
+    // MARK: - Active Session
+    // The session being built during the current sitting. Committed to sessions[] on end/save.
+
+    private(set) var activeSession: Session?
+
     // MARK: - Persistence Key
 
-    private let historyKey = "ff14_criterion_run_history"
+    private let sessionsKey = "ff14_criterion_sessions"
 
     // MARK: - Init
 
     init() {
-        loadHistory()
+        loadSessions()
     }
 
     // MARK: - Party Management
@@ -38,11 +43,20 @@ class PartyViewModel: ObservableObject {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
             players.append(Player(name: trimmed))
         }
+
+        // If party composition changes, close the active session so the next
+        // save starts a fresh one with the new roster.
+        if activeSession != nil {
+            commitActiveSession()
+        }
     }
 
     func removePlayer(_ player: Player) {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
             players.removeAll { $0.id == player.id }
+        }
+        if activeSession != nil {
+            commitActiveSession()
         }
     }
 
@@ -58,7 +72,6 @@ class PartyViewModel: ObservableObject {
         isRolling = true
         lastSaved = false
 
-        // Brief animation delay for effect
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self else { return }
 
@@ -77,53 +90,83 @@ class PartyViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Save Run
+    // MARK: - Save Run into Active Session
 
     func saveCurrentRun() {
         guard let run = currentRun else { return }
-        withAnimation {
-            runHistory.insert(run, at: 0)
-            lastSaved = true
+
+        if activeSession == nil {
+            // Start a brand-new session for this party
+            activeSession = Session(players: players, runs: [run])
+        } else {
+            activeSession?.runs.append(run)
         }
-        persistHistory()
+
+        // Upsert active session at the top of the sessions list
+        if let active = activeSession {
+            if let idx = sessions.firstIndex(where: { $0.id == active.id }) {
+                sessions[idx] = active
+            } else {
+                withAnimation { sessions.insert(active, at: 0) }
+            }
+        }
+
+        withAnimation { lastSaved = true }
+        persistSessions()
     }
 
     var currentRunAlreadySaved: Bool {
         guard let run = currentRun else { return false }
-        return runHistory.contains(where: { $0.id == run.id })
+        return activeSession?.runs.contains(where: { $0.id == run.id }) ?? false
+    }
+
+    // MARK: - End Session Manually
+
+    func endSession() {
+        commitActiveSession()
+    }
+
+    private func commitActiveSession() {
+        activeSession = nil
+        // Sessions list already up to date — nothing extra needed
     }
 
     // MARK: - History Management
 
-    func deleteRun(at offsets: IndexSet) {
-        runHistory.remove(atOffsets: offsets)
-        persistHistory()
+    func deleteSession(at offsets: IndexSet) {
+        // If we're deleting the active session, clear it too
+        for idx in offsets {
+            if sessions[idx].id == activeSession?.id {
+                activeSession = nil
+            }
+        }
+        withAnimation { sessions.remove(atOffsets: offsets) }
+        persistSessions()
     }
 
     func clearHistory() {
-        withAnimation {
-            runHistory.removeAll()
-        }
-        persistHistory()
+        withAnimation { sessions.removeAll() }
+        activeSession = nil
+        persistSessions()
     }
 
     // MARK: - Persistence
 
-    private func persistHistory() {
+    private func persistSessions() {
         do {
-            let data = try JSONEncoder().encode(runHistory)
-            UserDefaults.standard.set(data, forKey: historyKey)
+            let data = try JSONEncoder().encode(sessions)
+            UserDefaults.standard.set(data, forKey: sessionsKey)
         } catch {
-            print("Failed to save run history: \(error)")
+            print("Failed to save sessions: \(error)")
         }
     }
 
-    private func loadHistory() {
-        guard let data = UserDefaults.standard.data(forKey: historyKey) else { return }
+    private func loadSessions() {
+        guard let data = UserDefaults.standard.data(forKey: sessionsKey) else { return }
         do {
-            runHistory = try JSONDecoder().decode([Run].self, from: data)
+            sessions = try JSONDecoder().decode([Session].self, from: data)
         } catch {
-            print("Failed to load run history: \(error)")
+            print("Failed to load sessions: \(error)")
         }
     }
 }
